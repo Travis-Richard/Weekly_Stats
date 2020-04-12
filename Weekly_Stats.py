@@ -133,7 +133,7 @@ def trip_times():
     trip_list = list(map(list, zip(rec_s, rec)))
 
     # Script to save output file
-    path = "/home/richart/AOD/Weekly_Stats/"
+    path = "/home/richart/AOD/Weekly_Stats_Docs/"
     filename = "{}_{} Document.txt".format(sunday.replace(',', '-'), saturday.replace(',''', '-'))
     file = path + filename
     sys.stdout = open(file, "w")
