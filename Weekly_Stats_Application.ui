@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1042</width>
-    <height>312</height>
+    <width>1045</width>
+    <height>384</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,7 +22,7 @@
      <x>480</x>
      <y>10</y>
      <width>551</width>
-     <height>101</height>
+     <height>122</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="Week_Selection">
@@ -148,7 +148,7 @@
      <x>10</x>
      <y>120</y>
      <width>1021</width>
-     <height>185</height>
+     <height>252</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="Exclusion_Dates">
@@ -589,6 +589,20 @@
       </property>
      </widget>
     </item>
+    <item row="7" column="0" colspan="2">
+     <widget class="QPushButton" name="clear_btn">
+      <property name="text">
+       <string>Clear</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0" colspan="3">
+     <widget class="QLabel" name="clear_label">
+      <property name="text">
+       <string>Clear Exclusion Dates if mistake was made and btn pressed</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QTextBrowser" name="textBrowser">
@@ -604,8 +618,8 @@
     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;To use this application first select the date the week started on, then select the date the week ended on. Hit the OK button. Select all shifts that you want excluded from the week. These can be maintenance or development shifts. Select all that apply to that week then hit the Save Exclusion Dates button, that will allow the script to save these dates to be excluded. Once you are satisfied with everything, hit the Get Data button to get the trip data for the week.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Cantarell'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt;&quot;&gt;To use this application first select the date the week started on, then select the date the week ended on. Hit the OK button. Select all shifts that you want excluded from the week. These can be maintenance or development shifts. Select all that apply to that week then hit the Save Exclusion Dates button, that will allow the script to save these dates to be excluded. Once you are satisfied with everything, hit the Get Data button to get the trip data for the week.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
  </widget>
