@@ -133,7 +133,8 @@ def trip_times():
     trip_list = list(map(list, zip(rec_s, rec)))
 
     # Script to save output file
-    path = "/home/richart/AOD/Weekly_Stats_Docs/"
+    # path = "/home/richart/AOD/Weekly_Stats_Docs/" # Linux Path
+    path = "H:\Documents\Projects\Weekly_Stats_Docs" # Windows Path
     filename = "{}_{} Document.txt".format(sunday.replace(',', '-'), saturday.replace(',''', '-'))
     file = path + filename
     sys.stdout = open(file, "w")
@@ -184,13 +185,12 @@ def trip_times():
     plt.xticks(y_pos, num_of_trips,)
 
     # Saving the plot as an image
-    # path = "/home/richart/AOD/Weekly_Stats/"
+    # path = "/home/richart/AOD/Weekly_Stats_Docs/" # Linux Path
+    path = "H:\Documents\Projects\Weekly_Stats_Docs"  # Windows Path
     filename = "{}_{} Graph.png".format(sunday.replace(',', '-'), saturday.replace(',''', '-'))
     file = path + filename
     fig.savefig(file, bbox_inches=None, dpi=None)
-    # fig.savefig('Trip_Weekly_Stat_{}_{}.png'.format(sunday.replace(',', '-'),saturday.replace(',''', '-')),
-    #              bbox_inches=None, dpi=None)
-
+    
     # Show graphic
     plt.show()
     sys.stdout.close() # Close text file
