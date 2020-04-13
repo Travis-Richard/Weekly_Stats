@@ -359,7 +359,6 @@ class Ui_Weekly_Stats_Application(object):
     def excludeTimes(self):
         exc_time_s = []
         exc_time_e = []
-        days_shifts = ['sun_1st_s', 'sun_1st_e', 'sun_2nd_s', 'sun_2nd_e', 'sun_3rd_s', 'sun_3rd_e']
         day_of_week = ['sun', 'mon', 'tues', 'wed', 'thur', 'fri', 'sat']
 
         for i in range(0, len(day_of_week)):
