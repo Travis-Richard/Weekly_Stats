@@ -13,10 +13,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Weekly_Stats_Application(object):
     def setupUi(self, Weekly_Stats_Application):
         Weekly_Stats_Application.setObjectName("Weekly_Stats_Application")
-        Weekly_Stats_Application.resize(1042, 312)
+        Weekly_Stats_Application.resize(1045, 384)
         Weekly_Stats_Application.setToolTipDuration(-5)
         self.gridLayoutWidget = QtWidgets.QWidget(Weekly_Stats_Application)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(480, 10, 551, 101))
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(480, 10, 551, 122))
         self.gridLayoutWidget.setObjectName("gridLayoutWidget")
         self.Week_Selection = QtWidgets.QGridLayout(self.gridLayoutWidget)
         self.Week_Selection.setContentsMargins(0, 0, 0, 0)
@@ -51,7 +51,7 @@ class Ui_Weekly_Stats_Application(object):
         self.ok_btn_label.setObjectName("ok_btn_label")
         self.Week_Selection.addWidget(self.ok_btn_label, 2, 0, 1, 1)
         self.gridLayoutWidget_2 = QtWidgets.QWidget(Weekly_Stats_Application)
-        self.gridLayoutWidget_2.setGeometry(QtCore.QRect(10, 120, 1021, 185))
+        self.gridLayoutWidget_2.setGeometry(QtCore.QRect(10, 120, 1021, 252))
         self.gridLayoutWidget_2.setObjectName("gridLayoutWidget_2")
         self.Exclusion_Dates = QtWidgets.QGridLayout(self.gridLayoutWidget_2)
         self.Exclusion_Dates.setContentsMargins(0, 0, 0, 0)
@@ -248,6 +248,12 @@ class Ui_Weekly_Stats_Application(object):
         self.get_data_label = QtWidgets.QLabel(self.gridLayoutWidget_2)
         self.get_data_label.setObjectName("get_data_label")
         self.Exclusion_Dates.addWidget(self.get_data_label, 7, 3, 1, 2)
+        self.clear_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
+        self.clear_btn.setObjectName("clear_btn")
+        self.Exclusion_Dates.addWidget(self.clear_btn, 7, 0, 1, 2)
+        self.clear_label = QtWidgets.QLabel(self.gridLayoutWidget_2)
+        self.clear_label.setObjectName("clear_label")
+        self.Exclusion_Dates.addWidget(self.clear_label, 6, 0, 1, 3)
         self.textBrowser = QtWidgets.QTextBrowser(Weekly_Stats_Application)
         self.textBrowser.setGeometry(QtCore.QRect(10, 10, 461, 101))
         self.textBrowser.setObjectName("textBrowser")
@@ -295,11 +301,13 @@ class Ui_Weekly_Stats_Application(object):
         self.desc_label.setText(_translate("Weekly_Stats_Application", "Select shifts to be excluded from the above week, ie Maintenance or Development"))
         self.save_exc_dates_label.setText(_translate("Weekly_Stats_Application", "Press this button to have the excluded dates saved"))
         self.get_data_label.setText(_translate("Weekly_Stats_Application", "Press this button to get trip data for week"))
+        self.clear_btn.setText(_translate("Weekly_Stats_Application", "Clear"))
+        self.clear_label.setText(_translate("Weekly_Stats_Application", "Clear Exclusion Dates if mistake was made and btn pressed"))
         self.textBrowser.setHtml(_translate("Weekly_Stats_Application", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">To use this application first select the date the week started on, then select the date the week ended on. Hit the OK button. Select all shifts that you want excluded from the week. These can be maintenance or development shifts. Select all that apply to that week then hit the Save Exclusion Dates button, that will allow the script to save these dates to be excluded. Once you are satisfied with everything, hit the Get Data button to get the trip data for the week.</p></body></html>"))
+"</style></head><body style=\" font-family:\'Cantarell\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt;\">To use this application first select the date the week started on, then select the date the week ended on. Hit the OK button. Select all shifts that you want excluded from the week. These can be maintenance or development shifts. Select all that apply to that week then hit the Save Exclusion Dates button, that will allow the script to save these dates to be excluded. Once you are satisfied with everything, hit the Get Data button to get the trip data for the week.</span></p></body></html>"))
 
 
 if __name__ == "__main__":
