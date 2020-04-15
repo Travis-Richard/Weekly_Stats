@@ -539,6 +539,13 @@ class Ui_Weekly_Stats_Application(object):
         trip_recovery_times = []
         num_of_trips = []
 
+        # Script to save output file
+        # path = "/home/richart/AOD/Weekly_Stats_Docs/"  # Linux Path
+        path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
+        filename = "{}_{}-Document.txt".format(self.sun, self.sat)
+        file = path + filename
+        sys.stdout = open(file, "w")
+
         # trip_list is a list of lists that has a start and end time from the lists rec_s and rec
 
         trip_list = list(map(list, zip(rec_s, rec)))
@@ -589,17 +596,11 @@ class Ui_Weekly_Stats_Application(object):
 
         # Saving the plot as an image
         # path = "/home/richart/AOD/Weekly_Stats_Docs/"  # Linux Path
-        path = r'H:\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
+        path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
         filename = "{}_{}-Graph.png".format(self.sun, self.sat)
         file = path + filename
         fig.savefig(file, bbox_inches=None, dpi=None)
 
-        # Script to save output file
-        # path = "/home/richart/AOD/Weekly_Stats_Docs/"  # Linux Path
-        path = r"H:\Documents\Projects\Weekly_Stats_Docs/"  # Windows Path
-        filename = "{}_{}-Document.txt".format(self.sun, self.sat)
-        file = path + filename
-        sys.stdout = open(file, "w")
 
         # Show graphic
         plt.show()
