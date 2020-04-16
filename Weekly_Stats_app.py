@@ -560,7 +560,7 @@ class Ui_Weekly_Stats_Application(object):
         trip_start_time = []
         trip_end_time = []
 
-        
+
         # Script to save output file
         # path = "/home/richart/AOD/Weekly_Stats_Docs/"  # Linux Path
         path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
