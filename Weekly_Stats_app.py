@@ -428,6 +428,11 @@ class Ui_Weekly_Stats_Application(object):
             if btn_exc_time[i][0]:
                 self.exclude_time.append(btn_exc_time[i][1])
 
+        print("You have selected the following shifts to exclude, if this is not correct, hit the clear button and select again.")
+        for i in range(0, len(self.exclude_time)):
+            print(self.exclude_time[i][0], 'to', self.exclude_time[i][1])
+        print("If this is correct hit the Get Data button to collect trip data for the week.")
+
     def clear(self):
 
         # this function is called when the clear button on the GUI is pressed. It should only be pressed if dates and
@@ -435,8 +440,12 @@ class Ui_Weekly_Stats_Application(object):
         # cleared and the dates can be re selected
 
         self.exclude_time.clear()
+        print("The exclusion dates have been cleared, please re-select dates and hit the Save Exclusion Dates button")
 
     def getData(self):
+
+        print("Collecting Data, please wait and do not close program. A graph will be displayed when finished, you can then exit the program."
+              " All data will be saved to: home/AOD/Weekly_Stats")
 
         # this function is called when the Get Data button on the GUI is pressed. It retrieves the csv file,
         # reads it, parses the data, returns a graph of the trip times and saves this graph as well as a text
@@ -548,7 +557,8 @@ class Ui_Weekly_Stats_Application(object):
 
         trip_recovery_times = []
         num_of_trips = []
-
+        trip_start_time = []
+        trip_end_time = []
         # Script to save output file
         # path = "/home/richart/AOD/Weekly_Stats_Docs/"  # Linux Path
         path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
@@ -611,10 +621,33 @@ class Ui_Weekly_Stats_Application(object):
         file = path + filename
         fig.savefig(file, bbox_inches=None, dpi=None)
 
+        for i in range(0, len(trip_list)):
+            trip_start_time.append(trip_list[i][0])
+            trip_end_time.append(trip_list[i][1])
+
+        total_downtime = sum(trip_recovery_times)
+
+
+        trip_stats_dict = { 'Trip #' : num_of_trips,
+                            'Trip Start Time' : trip_start_time,
+                            'Trip End Time' : trip_end_time,
+                            'Recovery Time' : trip_recovery_times,
+                            'Total Downtime' : total_downtime}
+
+        # Saving a CSV file of trip information 
+
+        # path = "/home/richart/AOD/Weekly_Stats_Docs/"  # Linux Path
+        path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
+        filename = "{}_{}-CSV.csv".format(self.sun, self.sat)
+        file = path + filename
+        trip_stats = pd.DataFrame(trip_stats_dict, columns = ['Trip #', 'Trip Start Time', 'Trip End Time', 'Recovery Time', 'Total Downtime'])
+        trip_stats.to_csv(file, index=False)
 
         # Show graphic
         plt.show()
         sys.stdout.close()  # Close text file
+        app.quit()
+
 
 
 if __name__ == "__main__":
