@@ -502,6 +502,16 @@ class Ui_Weekly_Stats_Application(object):
                 if df['Current'][i + 1] < 1:
                     df.loc[i + 1, 'Trip'] = True
 
+        # This loop goes over the length of df, looks for a condition in where we are filling, If that condition is true
+        # it then looks to see if the next current falls below 1 mA, if this happens then we have another trip before
+        # we have fully recovered. Therefore we need to set a reocovery time to just before the trip happened at i-1
+
+        for i in range(1, len(df)):
+            if df['Current'][i-1] > 10 and df['Current_S'][i-1] > df['Current'][i-1]:
+                if df['Current_S'][i] < 1:
+                    df.loc[i-1, 'Recover'] = True
+
+
         # These two if statements look at the beginning and end of the week. Since we are always starting at Sunday
         # 00:00:00, we may have started with a trip from the previous week and thats why we need to set the Trip
         # equal to True, to account for downtime. Likewise, if the Current in the last row is still less than 1 we
