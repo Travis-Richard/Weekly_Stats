@@ -559,6 +559,8 @@ class Ui_Weekly_Stats_Application(object):
         num_of_trips = []
         trip_start_time = []
         trip_end_time = []
+
+        
         # Script to save output file
         # path = "/home/richart/AOD/Weekly_Stats_Docs/"  # Linux Path
         path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
@@ -634,7 +636,7 @@ class Ui_Weekly_Stats_Application(object):
                             'Recovery Time' : trip_recovery_times,
                             'Total Downtime' : total_downtime}
 
-        # Saving a CSV file of trip information 
+        # Saving a CSV file of trip information
 
         # path = "/home/richart/AOD/Weekly_Stats_Docs/"  # Linux Path
         path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
