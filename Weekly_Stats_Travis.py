@@ -8,6 +8,7 @@ import numpy as np
 from datetime import timedelta, datetime
 import seaborn as sns
 import sys
+import os
 
 exclude_time = []
 rec_s = []
@@ -430,7 +431,8 @@ class Ui_Weekly_Stats_Application(object):
             if btn_exc_time[i][0]:
                 self.exclude_time.append(btn_exc_time[i][1])
 
-        print("You have selected the following shifts to exclude, if this is not correct, hit the clear button and select again.")
+        print("You have selected the following shifts to exclude, if this is not correct, hit the clear button and "
+              "select again.")
         for i in range(0, len(self.exclude_time)):
             print(self.exclude_time[i][0], 'to', self.exclude_time[i][1])
         print("If this is correct hit the Get Data button to collect trip data for the week.")
@@ -446,8 +448,10 @@ class Ui_Weekly_Stats_Application(object):
 
     def getData(self):
 
-        print("Collecting Data, please wait and do not close program. A graph will be displayed when finished, you can then exit the program."
-              " All data will be saved to: home/AOD/Weekly_Stats")
+
+        print(
+            "Collecting Data, please wait and do not close program. A graph will be displayed when finished, you can then exit the program."
+            " All data will be saved to: home/AOD/Weekly_Stats")
 
         # this function is called when the Get Data button on the GUI is pressed. It retrieves the csv file,
         # reads it, parses the data, returns a graph of the trip times and saves this graph as well as a text
@@ -518,10 +522,9 @@ class Ui_Weekly_Stats_Application(object):
         # we have fully recovered. Therefore we need to set a reocovery time to just before the trip happened at i-1
 
         for i in range(1, len(df)):
-            if df['Current'][i-1] > 10 and df['Current_S'][i-1] > df['Current'][i-1]:
+            if df['Current'][i - 1] > 10 and df['Current_S'][i - 1] > df['Current'][i - 1]:
                 if df['Current_S'][i] < 1:
-                    df.loc[i-1, 'Recover'] = True
-
+                    df.loc[i - 1, 'Recover'] = True
 
         # These two if statements look at the beginning and end of the week. Since we are always starting at Sunday
         # 00:00:00, we may have started with a trip from the previous week and thats why we need to set the Trip
@@ -562,10 +565,9 @@ class Ui_Weekly_Stats_Application(object):
         trip_start_time = []
         trip_end_time = []
 
-
         # Script to save output file
-        # path = "/home/richart/AOD/Weekly_Stats_Docs/"  # Linux Path
-        path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
+        path = "/home/richart/AOD/Weekly_Stats_Docs/"  # Linux Path
+        # path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
         filename = "{}_{}-Document.txt".format(self.sun, self.sat)
         file = path + filename
         sys.stdout = open(file, "w")
@@ -619,8 +621,8 @@ class Ui_Weekly_Stats_Application(object):
         plt.xticks(y_pos, num_of_trips, )
 
         # Saving the plot as an image
-        # path = "/home/richart/AOD/Weekly_Stats_Docs/"  # Linux Path
-        path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
+        path = "/home/richart/AOD/Weekly_Stats_Docs/"  # Linux Path
+        # path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
         filename = "{}_{}-Graph.png".format(self.sun, self.sat)
         file = path + filename
         fig.savefig(file, bbox_inches=None, dpi=None)
@@ -631,27 +633,88 @@ class Ui_Weekly_Stats_Application(object):
 
         total_downtime = sum(trip_recovery_times)
 
-
-        trip_stats_dict = { 'Trip #' : num_of_trips,
-                            'Trip Start Time' : trip_start_time,
-                            'Trip End Time' : trip_end_time,
-                            'Recovery Time' : trip_recovery_times,
-                            'Total Downtime' : total_downtime}
+        trip_stats_dict = {'Trip #': num_of_trips,
+                           'Trip Start Time': trip_start_time,
+                           'Trip End Time': trip_end_time,
+                           'Recovery Time': trip_recovery_times,
+                           'Total Downtime': total_downtime}
 
         # Saving a CSV file of trip information
 
-        # path = "/home/richart/AOD/Weekly_Stats_Docs/"  # Linux Path
-        path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
+        path = "/home/richart/AOD/Weekly_Stats_Docs/"  # Linux Path
+        # path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
         filename = "{}_{}-CSV.csv".format(self.sun, self.sat)
         file = path + filename
-        trip_stats = pd.DataFrame(trip_stats_dict, columns = ['Trip #', 'Trip Start Time', 'Trip End Time', 'Recovery Time', 'Total Downtime'])
+        trip_stats = pd.DataFrame(trip_stats_dict,
+                                  columns=['Trip #', 'Trip Start Time', 'Trip End Time', 'Recovery Time',
+                                           'Total Downtime'])
         trip_stats.to_csv(file, index=False)
 
-        # Show graphic
+
+
+        # Create CSV File for running totals
+
+        total_wk_time = 10080 - len(self.exclude_time) * 480
+        percentage_up_time = ((total_wk_time - total_downtime) / total_wk_time) * 100
+        mean_time_to_recover = total_downtime / len(trip_recovery_times)
+        date_wk_end = self.sat
+
+        cycle_31 = pd.date_range(start='2020-01-01', end='2020-06-28')
+        cycle_32 = ''
+        if self.sun in cycle_31:
+            self.cycle = 'cycle_31'
+        elif self.sun in cycle_32:
+            self.cycle = 'cycle_32'
+
+        totals_dict = {'Total Week Time': total_wk_time,
+                       'Total Trip Time': total_downtime,
+                       'Percentage Up Time': percentage_up_time,
+                       'Mean Time To Recover': mean_time_to_recover,
+                       'Date Week End': date_wk_end}
+
+        path = "/home/richart/AOD/Weekly_Stats_Docs/"
+        filename = '{}.csv'.format(self.cycle)
+        file = path + filename
+
+        if os.path.isfile(file):
+            totals = pd.read_csv(file)
+            if date_wk_end in totals['Date Week End'].values:
+                totals.drop(totals.loc[totals['Date Week End'].values == date_wk_end].index, inplace=True)
+                totals.to_csv(file, index=False)
+                totals = pd.DataFrame(totals_dict, columns=['Total Week Time',
+                                                            'Total Trip Time',
+                                                            'Percentage Up Time',
+                                                            'Mean Time To Recover',
+                                                            'Date Week End'], index=[0])
+                totals.to_csv(file, mode='a', header=False, index=False)
+                totals = pd.read_csv(file)
+                totals['Date Week End'] = pd.to_datetime(totals['Date Week End'])
+                totals = totals.sort_values(by=['Date Week End'])
+                totals.to_csv(file, index=False)
+
+            else:
+                totals = pd.DataFrame(totals_dict, columns=['Total Week Time',
+                                                            'Total Trip Time',
+                                                            'Percentage Up Time',
+                                                            'Mean Time To Recover',
+                                                            'Date Week End'], index=[0])
+                totals.to_csv(file, mode='a', header=False, index=False)
+                totals = pd.read_csv(file)
+                totals['Date Week End'] = pd.to_datetime(totals['Date Week End'])
+                totals = totals.sort_values(by=['Date Week End'])
+                totals.to_csv(file, index=False)
+
+        else:
+            totals = pd.DataFrame(totals_dict, columns=['Total Week Time',
+                                                        'Total Trip Time',
+                                                        'Percentage Up Time',
+                                                        'Mean Time To Recover',
+                                                        'Date Week End'], index=[0])
+            totals.to_csv(file, index=False)
+            # Show graphic
         plt.show()
         sys.stdout.close()  # Close text file
-        app.quit()
-
+        # app.quit()
 
 
 if __name__ == "__main__":
