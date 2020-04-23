@@ -1,354 +1,312 @@
-# Travis File
-
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets, uic
+from PyQt5.QtCore import *
 import matplotlib.pyplot as plt
 import pandas as pd
-import datetime
+from PIL import Image
 import numpy as np
 from datetime import timedelta, datetime
 import seaborn as sns
 import sys
+import traceback
 import os
 
-exclude_time = []
-rec_s = []
-rec_e = []
-rec = []
-dates = []
+
+class WorkerSignals(QObject):
+    finished = pyqtSignal()
+    error = pyqtSignal(tuple)
+    result = pyqtSignal(object)
+    progress = pyqtSignal(object)
 
 
-class Ui_Weekly_Stats_Application(object):
+class Worker(QRunnable):
 
+    def __init__(self, fn, *args, **kwargs):
+        super(Worker, self).__init__()
+
+        # Store constructor arguments (re-used for processing)
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
+        self.signals = WorkerSignals()
+
+        # Add the callback to our kwargs
+        self.kwargs['progress_callback'] = self.signals.progress
+
+    @pyqtSlot()
+    def run(self):
+        '''
+        Initialise the runner function with passed args, kwargs.
+        '''
+
+        # Retrieve args/kwargs here; and fire processing using them
+        try:
+            result = self.fn(*self.args, **self.kwargs)
+        except:
+            traceback.print_exc()
+            exctype, value = sys.exc_info()[:2]
+            self.signals.error.emit((exctype, value, traceback.format_exc()))
+        else:
+            self.signals.result.emit(result)  # Return the result of the processing
+        finally:
+            self.signals.finished.emit()  # Done
+
+
+class WeeklyStats(QtWidgets.QWidget):
     def __init__(self):
-        self.exclude_time = exclude_time
-        self.rec_s = rec_s
-        self.rec_e = rec_e
-        self.rec = rec
-        self.dates = dates
+        super(WeeklyStats, self).__init__()
+        uic.loadUi('Weekly_Stats_Application.ui', self)
+        self.show()
+        self.threadpool = QThreadPool()
+        self.threadpool.setMaxThreadCount(1)
 
-    def setupUi(self, Weekly_Stats_Application):
-        Weekly_Stats_Application.setObjectName("Weekly_Stats_Application")
-        Weekly_Stats_Application.resize(1042, 312)
-        Weekly_Stats_Application.setToolTipDuration(-5)
-        self.gridLayoutWidget = QtWidgets.QWidget(Weekly_Stats_Application)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(480, 10, 551, 101))
-        self.gridLayoutWidget.setObjectName("gridLayoutWidget")
-        self.Week_Selection = QtWidgets.QGridLayout(self.gridLayoutWidget)
-        self.Week_Selection.setContentsMargins(0, 0, 0, 0)
-        self.Week_Selection.setObjectName("Week_Selection")
-        self.week_end = QtWidgets.QDateEdit(self.gridLayoutWidget)
-        # Setting the date to today's date
-        self.week_end.setDateTime(QtCore.QDateTime(QtCore.QDate.currentDate(), QtCore.QTime(23, 59, 59)))
-        self.week_end.setMaximumDate(QtCore.QDate(2050, 12, 31))
-        self.week_end.setMinimumDate(QtCore.QDate(2018, 1, 1))
-        self.week_end.setCalendarPopup(True)
-        self.week_end.setDate(QtCore.QDate.currentDate())
-        self.week_end.setObjectName("week_end")
-        self.Week_Selection.addWidget(self.week_end, 1, 1, 1, 1)
-        self.week_end_label = QtWidgets.QLabel(self.gridLayoutWidget)
-        self.week_end_label.setObjectName("week_end_label")
-        self.Week_Selection.addWidget(self.week_end_label, 1, 0, 1, 1)
-        self.week_start = QtWidgets.QDateEdit(self.gridLayoutWidget)
-        # Setting the date to today's date
-        self.week_start.setDateTime(QtCore.QDateTime(QtCore.QDate.currentDate(), QtCore.QTime(0, 0, 0)))
-        self.week_start.setMaximumDateTime(QtCore.QDateTime(QtCore.QDate(2050, 12, 31), QtCore.QTime(23, 59, 59)))
-        self.week_start.setMaximumDate(QtCore.QDate(2050, 12, 31))
-        self.week_start.setMinimumDate(QtCore.QDate(2018, 1, 1))
-        self.week_start.setCalendarPopup(True)
-        self.week_start.setDate(QtCore.QDate.currentDate())
-        self.week_start.setObjectName("week_start")
-        self.Week_Selection.addWidget(self.week_start, 0, 1, 1, 1)
-        self.ok_btn = QtWidgets.QPushButton(self.gridLayoutWidget)
-        self.ok_btn.setObjectName("ok_btn")
-        self.Week_Selection.addWidget(self.ok_btn, 2, 1, 1, 1)
-        self.week_start_label = QtWidgets.QLabel(self.gridLayoutWidget)
-        self.week_start_label.setObjectName("week_start_label")
-        self.Week_Selection.addWidget(self.week_start_label, 0, 0, 1, 1)
-        self.ok_btn_label = QtWidgets.QLabel(self.gridLayoutWidget)
-        self.ok_btn_label.setObjectName("ok_btn_label")
-        self.Week_Selection.addWidget(self.ok_btn_label, 2, 0, 1, 1)
-        self.gridLayoutWidget_2 = QtWidgets.QWidget(Weekly_Stats_Application)
-        self.gridLayoutWidget_2.setGeometry(QtCore.QRect(10, 120, 1021, 185))
-        self.gridLayoutWidget_2.setObjectName("gridLayoutWidget_2")
-        self.Exclusion_Dates = QtWidgets.QGridLayout(self.gridLayoutWidget_2)
-        self.Exclusion_Dates.setContentsMargins(0, 0, 0, 0)
-        self.Exclusion_Dates.setObjectName("Exclusion_Dates")
-        self.sun_label = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.sun_label.setFont(font)
-        self.sun_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.sun_label.setObjectName("sun_label")
-        self.Exclusion_Dates.addWidget(self.sun_label, 1, 0, 1, 1)
-        self.get_data_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.get_data_btn.setObjectName("get_data_btn")
-        self.Exclusion_Dates.addWidget(self.get_data_btn, 7, 5, 1, 2)
-        self.save_exc_dates_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.save_exc_dates_btn.setObjectName("save_exc_dates_btn")
-        self.Exclusion_Dates.addWidget(self.save_exc_dates_btn, 6, 5, 1, 2)
-        self.thur_label = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.thur_label.setFont(font)
-        self.thur_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.thur_label.setObjectName("thur_label")
-        self.Exclusion_Dates.addWidget(self.thur_label, 1, 4, 1, 1)
-        self.sat_label = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.sat_label.setFont(font)
-        self.sat_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.sat_label.setObjectName("sat_label")
-        self.Exclusion_Dates.addWidget(self.sat_label, 1, 6, 1, 1)
-        self.fri_label = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.fri_label.setFont(font)
-        self.fri_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.fri_label.setObjectName("fri_label")
-        self.Exclusion_Dates.addWidget(self.fri_label, 1, 5, 1, 1)
-        self.mon_label = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.mon_label.setFont(font)
-        self.mon_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.mon_label.setObjectName("mon_label")
-        self.Exclusion_Dates.addWidget(self.mon_label, 1, 1, 1, 1)
-        self.tues_label = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.tues_label.setFont(font)
-        self.tues_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.tues_label.setObjectName("tues_label")
-        self.Exclusion_Dates.addWidget(self.tues_label, 1, 2, 1, 1)
-        self.wed_label = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.wed_label.setFont(font)
-        self.wed_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.wed_label.setObjectName("wed_label")
-        self.Exclusion_Dates.addWidget(self.wed_label, 1, 3, 1, 1)
-        self.sun_1st_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.sun_1st_btn.setCheckable(True)
-        self.sun_1st_btn.setObjectName("sun_1st_btn")
-        self.Exclusion_Dates_btns = QtWidgets.QButtonGroup(Weekly_Stats_Application)
-        self.Exclusion_Dates_btns.setObjectName("Exclusion_Dates_btns")
-        self.Exclusion_Dates_btns.setExclusive(False)
-        self.Exclusion_Dates_btns.addButton(self.sun_1st_btn)
-        self.Exclusion_Dates.addWidget(self.sun_1st_btn, 3, 0, 1, 1)
-        self.mon_1st_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.mon_1st_btn.setCheckable(True)
-        self.mon_1st_btn.setObjectName("mon_1st_btn")
-        self.Exclusion_Dates_btns.addButton(self.mon_1st_btn)
-        self.Exclusion_Dates.addWidget(self.mon_1st_btn, 3, 1, 1, 1)
-        self.tues_1st_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.tues_1st_btn.setCheckable(True)
-        self.tues_1st_btn.setObjectName("tues_1st_btn")
-        self.Exclusion_Dates_btns.addButton(self.tues_1st_btn)
-        self.Exclusion_Dates.addWidget(self.tues_1st_btn, 3, 2, 1, 1)
-        self.sat_1st_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.sat_1st_btn.setCheckable(True)
-        self.sat_1st_btn.setObjectName("sat_1st_btn")
-        self.Exclusion_Dates_btns.addButton(self.sat_1st_btn)
-        self.Exclusion_Dates.addWidget(self.sat_1st_btn, 3, 6, 1, 1)
-        self.fri_1st_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.fri_1st_btn.setCheckable(True)
-        self.fri_1st_btn.setObjectName("fri_1st_btn")
-        self.Exclusion_Dates_btns.addButton(self.fri_1st_btn)
-        self.Exclusion_Dates.addWidget(self.fri_1st_btn, 3, 5, 1, 1)
-        self.thur_1st_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.thur_1st_btn.setCheckable(True)
-        self.thur_1st_btn.setObjectName("thur_1st_btn")
-        self.Exclusion_Dates_btns.addButton(self.thur_1st_btn)
-        self.Exclusion_Dates.addWidget(self.thur_1st_btn, 3, 4, 1, 1)
-        self.wed_1st_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.wed_1st_btn.setCheckable(True)
-        self.wed_1st_btn.setObjectName("wed_1st_btn")
-        self.Exclusion_Dates_btns.addButton(self.wed_1st_btn)
-        self.Exclusion_Dates.addWidget(self.wed_1st_btn, 3, 3, 1, 1)
-        self.wed_2nd_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.wed_2nd_btn.setCheckable(True)
-        self.wed_2nd_btn.setObjectName("wed_2nd_btn")
-        self.Exclusion_Dates_btns.addButton(self.wed_2nd_btn)
-        self.Exclusion_Dates.addWidget(self.wed_2nd_btn, 4, 3, 1, 1)
-        self.tues_2nd_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.tues_2nd_btn.setCheckable(True)
-        self.tues_2nd_btn.setObjectName("tues_2nd_btn")
-        self.Exclusion_Dates_btns.addButton(self.tues_2nd_btn)
-        self.Exclusion_Dates.addWidget(self.tues_2nd_btn, 4, 2, 1, 1)
-        self.tues_3rd_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.tues_3rd_btn.setCheckable(True)
-        self.tues_3rd_btn.setObjectName("tues_3rd_btn")
-        self.Exclusion_Dates_btns.addButton(self.tues_3rd_btn)
-        self.Exclusion_Dates.addWidget(self.tues_3rd_btn, 5, 2, 1, 1)
-        self.mon_3rd_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.mon_3rd_btn.setCheckable(True)
-        self.mon_3rd_btn.setObjectName("mon_3rd_btn")
-        self.Exclusion_Dates_btns.addButton(self.mon_3rd_btn)
-        self.Exclusion_Dates.addWidget(self.mon_3rd_btn, 5, 1, 1, 1)
-        self.mon_2nd_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.mon_2nd_btn.setCheckable(True)
-        self.mon_2nd_btn.setObjectName("mon_2nd_btn")
-        self.Exclusion_Dates_btns.addButton(self.mon_2nd_btn)
-        self.Exclusion_Dates.addWidget(self.mon_2nd_btn, 4, 1, 1, 1)
-        self.sun_2nd_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.sun_2nd_btn.setCheckable(True)
-        self.sun_2nd_btn.setObjectName("sun_2nd_btn")
-        self.Exclusion_Dates_btns.addButton(self.sun_2nd_btn)
-        self.Exclusion_Dates.addWidget(self.sun_2nd_btn, 4, 0, 1, 1)
-        self.sun_3rd_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.sun_3rd_btn.setCheckable(True)
-        self.sun_3rd_btn.setObjectName("sun_3rd_btn")
-        self.Exclusion_Dates_btns.addButton(self.sun_3rd_btn)
-        self.Exclusion_Dates.addWidget(self.sun_3rd_btn, 5, 0, 1, 1)
-        self.fri_2nd_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.fri_2nd_btn.setCheckable(True)
-        self.fri_2nd_btn.setObjectName("fri_2nd_btn")
-        self.Exclusion_Dates_btns.addButton(self.fri_2nd_btn)
-        self.Exclusion_Dates.addWidget(self.fri_2nd_btn, 4, 5, 1, 1)
-        self.sat_2nd_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.sat_2nd_btn.setCheckable(True)
-        self.sat_2nd_btn.setObjectName("sat_2nd_btn")
-        self.Exclusion_Dates_btns.addButton(self.sat_2nd_btn)
-        self.Exclusion_Dates.addWidget(self.sat_2nd_btn, 4, 6, 1, 1)
-        self.fri_3rd_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.fri_3rd_btn.setCheckable(True)
-        self.fri_3rd_btn.setObjectName("fri_3rd_btn")
-        self.Exclusion_Dates_btns.addButton(self.fri_3rd_btn)
-        self.Exclusion_Dates.addWidget(self.fri_3rd_btn, 5, 5, 1, 1)
-        self.sat_3rd_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.sat_3rd_btn.setCheckable(True)
-        self.sat_3rd_btn.setObjectName("sat_3rd_btn")
-        self.Exclusion_Dates_btns.addButton(self.sat_3rd_btn)
-        self.Exclusion_Dates.addWidget(self.sat_3rd_btn, 5, 6, 1, 1)
-        self.wed_3rd_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.wed_3rd_btn.setCheckable(True)
-        self.wed_3rd_btn.setObjectName("wed_3rd_btn")
-        self.Exclusion_Dates_btns.addButton(self.wed_3rd_btn)
-        self.Exclusion_Dates.addWidget(self.wed_3rd_btn, 5, 3, 1, 1)
-        self.thur_2nd_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.thur_2nd_btn.setCheckable(True)
-        self.thur_2nd_btn.setObjectName("thur_2nd_btn")
-        self.Exclusion_Dates_btns.addButton(self.thur_2nd_btn)
-        self.Exclusion_Dates.addWidget(self.thur_2nd_btn, 4, 4, 1, 1)
-        self.thur_3rd_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.thur_3rd_btn.setCheckable(True)
-        self.thur_3rd_btn.setObjectName("thur_3rd_btn")
-        self.Exclusion_Dates_btns.addButton(self.thur_3rd_btn)
-        self.Exclusion_Dates.addWidget(self.thur_3rd_btn, 5, 4, 1, 1)
-        self.desc_label = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.desc_label.setFont(font)
-        self.desc_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.desc_label.setObjectName("desc_label")
-        self.Exclusion_Dates.addWidget(self.desc_label, 0, 0, 1, 7)
-        self.save_exc_dates_label = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        self.save_exc_dates_label.setObjectName("save_exc_dates_label")
-        self.Exclusion_Dates.addWidget(self.save_exc_dates_label, 6, 3, 1, 2)
-        self.get_data_label = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        self.get_data_label.setObjectName("get_data_label")
-        self.Exclusion_Dates.addWidget(self.get_data_label, 7, 3, 1, 2)
-        self.clear_btn = QtWidgets.QPushButton(self.gridLayoutWidget_2)
-        self.clear_btn.setObjectName("clear_btn")
-        self.Exclusion_Dates.addWidget(self.clear_btn, 7, 0, 1, 2)
-        self.clear_label = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        self.clear_label.setObjectName("clear_label")
-        self.Exclusion_Dates.addWidget(self.clear_label, 6, 0, 1, 3)
-        self.textBrowser = QtWidgets.QTextBrowser(Weekly_Stats_Application)
-        self.textBrowser.setGeometry(QtCore.QRect(10, 10, 461, 101))
-        self.textBrowser.setObjectName("textBrowser")
+        self.exclude_time = []
+        self.rec_s = []
+        self.rec_e = []
+        self.rec = []
+        self.dates = []
+        self.trip_recovery_times = []
+        self.num_of_trips = []
+        self.trip_start_time = []
+        self.trip_end_time = []
+        self.path = "/home/richart/AOD/Weekly_Stats_Docs/"  # Linux Path
+        # self.path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
 
-        self.retranslateUi(Weekly_Stats_Application)
-        QtCore.QMetaObject.connectSlotsByName(Weekly_Stats_Application)
-
-        self.ok_btn.clicked.connect(self.weekSelection)
-        self.save_exc_dates_btn.clicked.connect(self.excludeTimes)
+        self.ok_btn.clicked.connect(self.week_selection)
+        self.save_exc_dates_btn.clicked.connect(self.exclude_times)
         self.clear_btn.clicked.connect(self.clear)
-        self.get_data_btn.clicked.connect(self.getData)
+        self.get_data_btn.clicked.connect(self.get_data_thread)
 
-    def retranslateUi(self, Weekly_Stats_Application):
-        _translate = QtCore.QCoreApplication.translate
-        Weekly_Stats_Application.setWindowTitle(_translate("Weekly_Stats_Application", "Weekly_Stats_Application"))
-        self.week_end_label.setText(_translate("Weekly_Stats_Application", "Week End"))
-        self.ok_btn.setText(_translate("Weekly_Stats_Application", "OK"))
-        self.week_start_label.setText(_translate("Weekly_Stats_Application", "Week Start"))
-        self.ok_btn_label.setText(_translate("Weekly_Stats_Application", "Press OK to use selected dates"))
-        self.sun_label.setText(_translate("Weekly_Stats_Application", "Sun"))
-        self.get_data_btn.setText(_translate("Weekly_Stats_Application", "Get Data"))
-        self.save_exc_dates_btn.setText(_translate("Weekly_Stats_Application", "Save Exclusion Dates"))
-        self.thur_label.setText(_translate("Weekly_Stats_Application", "Thur"))
-        self.sat_label.setText(_translate("Weekly_Stats_Application", "Sat"))
-        self.fri_label.setText(_translate("Weekly_Stats_Application", "Fri"))
-        self.mon_label.setText(_translate("Weekly_Stats_Application", "Mon"))
-        self.tues_label.setText(_translate("Weekly_Stats_Application", "Tues"))
-        self.wed_label.setText(_translate("Weekly_Stats_Application", "Wed"))
-        self.sun_1st_btn.setText(_translate("Weekly_Stats_Application", "00:00"))
-        self.mon_1st_btn.setText(_translate("Weekly_Stats_Application", "00:00"))
-        self.tues_1st_btn.setText(_translate("Weekly_Stats_Application", "00:00"))
-        self.sat_1st_btn.setText(_translate("Weekly_Stats_Application", "00:00"))
-        self.fri_1st_btn.setText(_translate("Weekly_Stats_Application", "00:00"))
-        self.thur_1st_btn.setText(_translate("Weekly_Stats_Application", "00:00"))
-        self.wed_1st_btn.setText(_translate("Weekly_Stats_Application", "00:00"))
-        self.wed_2nd_btn.setText(_translate("Weekly_Stats_Application", "08:00"))
-        self.tues_2nd_btn.setText(_translate("Weekly_Stats_Application", "08:00"))
-        self.tues_3rd_btn.setText(_translate("Weekly_Stats_Application", "16:00"))
-        self.mon_3rd_btn.setText(_translate("Weekly_Stats_Application", "16:00"))
-        self.mon_2nd_btn.setText(_translate("Weekly_Stats_Application", "08:00"))
-        self.sun_2nd_btn.setText(_translate("Weekly_Stats_Application", "08:00"))
-        self.sun_3rd_btn.setText(_translate("Weekly_Stats_Application", "16:00"))
-        self.fri_2nd_btn.setText(_translate("Weekly_Stats_Application", "08:00"))
-        self.sat_2nd_btn.setText(_translate("Weekly_Stats_Application", "08:00"))
-        self.fri_3rd_btn.setText(_translate("Weekly_Stats_Application", "16:00"))
-        self.sat_3rd_btn.setText(_translate("Weekly_Stats_Application", "16:00"))
-        self.wed_3rd_btn.setText(_translate("Weekly_Stats_Application", "16:00"))
-        self.thur_2nd_btn.setText(_translate("Weekly_Stats_Application", "08:00"))
-        self.thur_3rd_btn.setText(_translate("Weekly_Stats_Application", "16:00"))
-        self.desc_label.setText(_translate("Weekly_Stats_Application",
-                                           "Select shifts to be excluded from the above week, ie Maintenance or "
-                                           "Development"))
-        self.save_exc_dates_label.setText(
-            _translate("Weekly_Stats_Application", "Press this button to have the excluded dates saved"))
-        self.clear_btn.setText(_translate("Weekly_Stats_Application", "Clear"))
-        self.clear_label.setText(
-            _translate("Weekly_Stats_Application", "Clear Exclusion Dates if mistake was made and btn pressed"))
-        self.get_data_label.setText(
-            _translate("Weekly_Stats_Application", "Press this button to get trip data for week"))
-        self.textBrowser.setHtml(_translate("Weekly_Stats_Application",
-                                            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" "
-                                            "\"http://www.w3.org/TR/REC-html40/strict.dtd\">\n "
-                                            "<html><head><meta name=\"qrichtext\" content=\"1\" /><style "
-                                            "type=\"text/css\">\n "
-                                            "p, li { white-space: pre-wrap; }\n"
-                                            "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; "
-                                            "font-size:8.25pt; font-weight:400; font-style:normal;\">\n "
-                                            "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; "
-                                            "margin-right:0px; -qt-block-indent:0; text-indent:0px;\">To use this "
-                                            "application first select the date the week started on, then select the "
-                                            "date the week ended on. Hit the OK button. Select all shifts that you "
-                                            "want excluded from the week. These can be maintenance or development "
-                                            "shifts. Select all that apply to that week then hit the Save Exclusion "
-                                            "Dates button, that will allow the script to save these dates to be "
-                                            "excluded. Once you are satisfied with everything, hit the Get Data "
-                                            "button to get the trip data for the week.</p></body></html>"))
+    def get_data_thread(self):
+        # print('starting get data thread')
+        worker = Worker(self.get_data)  # Any other args, kwargs are passed to the run function
+        # worker.signals.finished.connect(self.thread_complete)
+        worker.signals.finished.connect(self.save_files_thread)
+        # Execute
+        self.threadpool.start(worker)
 
-    def weekSelection(self):
+    def save_files_thread(self):
+        # Pass the function to execute
+        save_files_list = [self.get_info, self.save_weekly_csv, self.save_weekly_graph, self.save_total_csv,
+                           self.save_total_graph, self.display_figures]
+        for i in save_files_list:
+            worker = Worker(i)  # Any other args, kwargs are passed to the run function
+            # worker.signals.finished.connect(self.thread_complete)
+            # Execute
+            self.threadpool.start(worker)
+
+    def get_info(self, progress_callback):
+
+        self.trip_list = list(map(list, zip(self.rec_s, self.rec)))
+
+        if len(self.trip_list) > 0:
+
+            for i in range(0, len(self.trip_list)):
+                print('Trip #:', i + 1, 'start time', self.trip_list[i][0])
+                print('Trip #:', i + 1, 'end time', self.trip_list[i][1])
+                trip_time_i = pd.Timedelta(self.trip_list[i][1] - self.trip_list[i][0]).seconds / 60
+                trip_time_i = round(trip_time_i, 1)
+                print('This is Trip #', i + 1, 'recovery time', '\n', trip_time_i, 'Minutes')
+                self.trip_recovery_times.append(trip_time_i)
+                self.num_of_trips.append(i + 1)
+                print()
+
+            print('This is a list of all trip times:', '\n', self.trip_recovery_times)
+            print("Total trip time for this period in Minutes is :", sum(self.trip_recovery_times))
+
+            for i in range(0, len(self.trip_list)):
+                self.trip_start_time.append(self.trip_list[i][0])
+                self.trip_end_time.append(self.trip_list[i][1])
+
+            self.total_downtime = sum(self.trip_recovery_times)
+
+            self.trip_stats_dict = {'Trip #': self.num_of_trips,
+                                    'Trip Start Time': self.trip_start_time,
+                                    'Trip End Time': self.trip_end_time,
+                                    'Recovery Time': self.trip_recovery_times,
+                                    'Total Downtime': self.total_downtime}
+
+        else:
+
+            self.total_downtime = 0
+            self.trip_recovery_times = [0]
+
+    def save_weekly_csv(self, progress_callback):
+
+        if len(self.trip_list) > 0:
+
+            filename = "{}_{}-CSV.csv".format(self.sun, self.sat)
+            file = self.path + filename
+            trip_stats = pd.DataFrame(self.trip_stats_dict, columns=['Trip #', 'Trip Start Time', 'Trip End Time',
+                                                                     'Recovery Time', 'Total Downtime'])
+            trip_stats.to_csv(file, index=False)
+
+        else:
+
+            return
+
+    def save_weekly_graph(self, progress_callback):
+
+        if len(self.trip_list) > 0:
+            # sns.set(style="whitegrid")
+            # tips = sns.load_dataset("tips")
+
+            # Setting the figure size
+            fig = plt.figure(figsize=(10, 7))
+
+            y_pos = np.arange(len(self.num_of_trips))
+            plt.bar(y_pos, self.trip_recovery_times, width=0.5, color='red')
+
+            # adding label to the top of each bars
+            for x, y in zip(y_pos, self.trip_recovery_times, ):
+                label = "{:.1f}".format(y)
+
+                plt.annotate(label,  # this is the text
+                             (x, y),  # this is the point to label
+                             textcoords="offset points",  # how to position the text
+                             xytext=(0, 10),  # distance from text to points (x,y)
+                             ha='center', fontsize=15,
+                             fontweight='bold')  # horizontal alignment (ha) can be left, right or center
+
+            # Add title and axis names
+            plt.title(
+                'Trip Weekly Stat ({}_{})'.format(self.sun, self.sat, fontsize=17))
+            plt.xlabel('Number of Trips', fontsize=15)
+            plt.ylabel('Trip Recovery Time (Minutes)', fontsize=15)
+
+            # Limits for the Y axis2
+            plt.ylim(0, max(self.trip_recovery_times) + 10)
+
+            # Create names
+            plt.xticks(y_pos, self.num_of_trips, )
+
+            filename = "{}_{}-Graph.png".format(self.sun, self.sat)
+            file = self.path + filename
+            fig.savefig(file, bbox_inches=None, dpi=None)
+
+        else:
+
+            return
+
+    def save_total_csv(self, progress_callback):
+
+        total_wk_time = 10080 - len(self.exclude_time) * 480
+        percentage_up_time = ((total_wk_time - self.total_downtime) / total_wk_time) * 100
+        mean_time_to_recover = self.total_downtime / len(self.trip_recovery_times)
+        date_wk_end = self.sat
+
+        cycle_31 = pd.date_range(start='2020-01-01', end='2020-06-28')
+        cycle_32 = ''
+        if self.sun in cycle_31:
+            self.cycle = 'cycle_31'
+        elif self.sun in cycle_32:
+            self.cycle = 'cycle_32'
+
+        totals_dict = {'Total Week Time': total_wk_time,
+                       'Total Trip Time': self.total_downtime,
+                       'Percentage Up Time': percentage_up_time,
+                       'Mean Time To Recover': mean_time_to_recover,
+                       'Date Week End': date_wk_end}
+
+        filename = '{}.csv'.format(self.cycle)
+        file = self.path + filename
+
+        if os.path.isfile(file):
+            totals = pd.read_csv(file)
+            if date_wk_end in totals['Date Week End'].values:
+                totals.drop(totals.loc[totals['Date Week End'].values == date_wk_end].index, inplace=True)
+                totals.to_csv(file, index=False)
+                totals = pd.DataFrame(totals_dict, columns=['Total Week Time',
+                                                            'Total Trip Time',
+                                                            'Percentage Up Time',
+                                                            'Mean Time To Recover',
+                                                            'Date Week End'], index=[0])
+                totals.to_csv(file, mode='a', header=False, index=False)
+                totals = pd.read_csv(file)
+                totals['Date Week End'] = pd.to_datetime(totals['Date Week End'])
+                totals = totals.sort_values(by=['Date Week End'])
+                totals.to_csv(file, index=False)
+
+            else:
+                totals = pd.DataFrame(totals_dict, columns=['Total Week Time',
+                                                            'Total Trip Time',
+                                                            'Percentage Up Time',
+                                                            'Mean Time To Recover',
+                                                            'Date Week End'], index=[0])
+                totals.to_csv(file, mode='a', header=False, index=False)
+                totals = pd.read_csv(file)
+                totals['Date Week End'] = pd.to_datetime(totals['Date Week End'])
+                totals = totals.sort_values(by=['Date Week End'])
+                totals.to_csv(file, index=False)
+
+        else:
+            totals = pd.DataFrame(totals_dict, columns=['Total Week Time',
+                                                        'Total Trip Time',
+                                                        'Percentage Up Time',
+                                                        'Mean Time To Recover',
+                                                        'Date Week End'], index=[0])
+            totals.to_csv(file, index=False)
+
+    def save_total_graph(self, progress_callback):
+
+        filename = '{}.csv'.format(self.cycle)
+        file = self.path + filename
+        running_total = pd.read_csv(file)
+        percentage_up_time = running_total['Percentage Up Time'].tolist()
+        mean_time_to_recover = running_total['Mean Time To Recover'].tolist()
+        date_week_end = running_total['Date Week End'].tolist()
+
+        # Plotting the variables
+        fig = plt.figure(figsize=(10, 4))
+
+        # Data
+        x = date_week_end
+        y1 = percentage_up_time
+        y2 = mean_time_to_recover
+
+        # create figure and axis objects with subplots()
+        fig, ax = plt.subplots()
+
+        # make a plot
+        plot1 = ax.plot(x, y1, linewidth=2, color="orange", marker="o", label='Percentage up time')
+
+        # set x-axis label
+        ax.set_xlabel("Date Week End", fontsize=13)
+
+        # set y-axis label
+        ax.set_ylabel("percentage up time (%)", color="orange", fontsize=13)
+
+        # twin object for two different y-axis on the sample plot
+        ax2 = ax.twinx()
+
+        # make a plot with different y-axis using second axis object
+        plot2 = ax2.plot(x, y2, linewidth=2, color="blue", marker="o", label='mean time to recover')
+        ax2.set_ylabel("mean time to recover (mins)", color="blue", fontsize=13)
+        plt.title('Trip Weekly Stat', fontsize=13)
+
+        # Add legend
+        lns = plot1 + plot2
+        labs = [l.get_label() for l in lns]
+        ax.legend(lns, labs, loc='upper center', bbox_to_anchor=(0.5, -0.40),
+                  fancybox=True, shadow=True, ncol=5)
+        fig.autofmt_xdate(rotation=45)  # line to slant the xtick labels
+
+        # Saving cumulative weekly file to directory
+        filename = '{}-Graph.png'.format(self.cycle)
+        file = self.path + filename
+        fig.savefig(file, bbox_inches='tight', dpi=200)
+
+    def display_figures(self, progress_callback):
+        graph_list = ["{}_{}-Graph.png".format(self.sun, self.sat), '{}-Graph.png'.format(self.cycle)]
+        for graph in graph_list:
+            file = self.path + graph
+            if os.path.isfile(file):
+                img = Image.open(file)
+                img.show()
+            else:
+                print()
+                print('There were not any trips this week, so no weekly graph will be saved')
+
+    def week_selection(self):
         sunday = self.week_start.dateTime().toPyDateTime()
         saturday = self.week_end.dateTime().toPyDateTime()
         self.sun = sunday.strftime('%Y-%m-%d')
@@ -357,6 +315,8 @@ class Ui_Weekly_Stats_Application(object):
                        '&from={}T00:00:00&to={}T23:59:59&binSize=30' \
             .format(self.sun, self.sat)
         print('Click this link to show data archiver plot:', '\n', url_archiver)
+        print()
+        print()
 
         self.dates = [sunday + timedelta(days=x) for x in range((saturday - sunday).days + 1)]
         # print(self.dates)
@@ -372,9 +332,10 @@ class Ui_Weekly_Stats_Application(object):
             .format(sunday.strftime('%Y-%m-%d'), sunday.strftime('%H'), sunday.strftime('%M'),
                     sunday.strftime('%S'), saturday.strftime('%Y-%m-%d'), saturday.strftime('%H'),
                     saturday.strftime('%M'), saturday.strftime('%S'))
+
         # print(self.url_csv_retrieval)
 
-    def excludeTimes(self):
+    def exclude_times(self):
         exc_time_s = []
         exc_time_e = []
         day_of_week = ['sun', 'mon', 'tues', 'wed', 'thur', 'fri', 'sat']
@@ -433,12 +394,17 @@ class Ui_Weekly_Stats_Application(object):
 
         print("You have selected the following shifts to exclude, if this is not correct, hit the clear button and "
               "select again.")
+        print()
+
         for i in range(0, len(self.exclude_time)):
             print(self.exclude_time[i][0], 'to', self.exclude_time[i][1])
+
+        print()
         print("If this is correct hit the Get Data button to collect trip data for the week.")
+        print()
+        print()
 
     def clear(self):
-
         # this function is called when the clear button on the GUI is pressed. It should only be pressed if dates and
         # times were selected to be excluded but a mistake was made. In that case the exclude_time list can be
         # cleared and the dates can be re selected
@@ -446,18 +412,16 @@ class Ui_Weekly_Stats_Application(object):
         self.exclude_time.clear()
         print("The exclusion dates have been cleared, please re-select dates and hit the Save Exclusion Dates button")
 
-    def getData(self):
+    def get_data(self, progress_callback):
 
         print(
             "Collecting Data, please wait and do not close program. A graph will be displayed when finished, "
             "you can then exit the program. All data will be saved to: home/AOD/Weekly_Stats_Docs")
+        print()
 
         # this function is called when the Get Data button on the GUI is pressed. It retrieves the csv file,
         # reads it, parses the data, returns a graph of the trip times and saves this graph as well as a text
         # document that includes the information about the trips
-
-        sns.set(style="whitegrid")
-        tips = sns.load_dataset("tips")
 
         # the code below is reading the csv from the self.url_csv_retrieval link that we created in the weekSelection
         # function, it then transforms it into a pandas dataframe. With this datafram we set the column names and
@@ -518,10 +482,12 @@ class Ui_Weekly_Stats_Application(object):
 
         # This loop goes over the length of df, looks for a condition in where we are filling, If that condition is true
         # it then looks to see if the next current falls below 1 mA, if this happens then we have another trip before
-        # we have fully recovered. Therefore we need to set a reocovery time to just before the trip happened at i-1
+        # we have fully recovered. Therefore we need to set a recovery time to just before the trip happened at i-1
 
         for i in range(1, len(df)):
-            if df['Current'][i - 1] > 10 and df['Current_S'][i - 1] > df['Current'][i - 1]:
+            # if df['Current'][i - 1] > 10 and df['Current_S'][i - 1] > df['Current'][i - 1]:
+
+            if 10 < df['Current'][i - 1] < df['Current_S'][i - 1]:
                 if df['Current_S'][i] < 1:
                     df.loc[i - 1, 'Recover'] = True
 
@@ -543,257 +509,29 @@ class Ui_Weekly_Stats_Application(object):
         # values in this list.
 
         for i in range(0, len(df)):
-            if df['Trip'][i] == True:
-                rec_s.append(pd.to_datetime(df['Time'][i]))
-            if df['Recover'][i] == True:
-                rec_e.append(pd.to_datetime(df['Time'][i]))
+            if df['Trip'][i]:
+                self.rec_s.append(pd.to_datetime(df['Time'][i]))
+            if df['Recover'][i]:
+                self.rec_e.append(pd.to_datetime(df['Time'][i]))
 
         # This loop fixes the above problem, it first loops over rec_s list, for the value in rec_s it loops over
         # rec_e, if the value in rec_e is greater than the value in rec_s, it appends this value to a new list rec.
         # It the breaks the inner for loop and goes to the next value in rec_s. This will allow us to have the same
         # number of items in each list and we will have lists that have a start and end time
 
-        for i in rec_s:
-            for v in rec_e:
+        for i in self.rec_s:
+            for v in self.rec_e:
                 if v > i:
-                    rec.append(v)
+                    self.rec.append(v)
                     break
 
-        trip_recovery_times = []
-        num_of_trips = []
-        trip_start_time = []
-        trip_end_time = []
+        print('Data is collected, the files will now be saved')
 
-        # Script to save output file
-        path = "/home/richart/AOD/Weekly_Stats_Docs/"  # Linux Path
-        # path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
-        filename = "{}_{}-Document.txt".format(self.sun, self.sat)
-        file = path + filename
-        sys.stdout = open(file, "w")
-
-        # trip_list is a list of lists that has a start and end time from the lists rec_s and rec
-
-        trip_list = list(map(list, zip(rec_s, rec)))
-
-        # This loop calculates each trip time we have and assigns a number to each trip, 1,2,3,... it appends these
-        # values to trip_recovery_times and num_of_trips respectively
-
-        if len(trip_list) > 0:
-
-            for i in range(0, len(trip_list)):
-                print('Trip #:', i + 1, 'start time', trip_list[i][0])
-                print('Trip #:', i + 1, 'end time', trip_list[i][1])
-                trip_time_i = pd.Timedelta(trip_list[i][1] - trip_list[i][0]).seconds / 60
-                trip_time_i = round(trip_time_i, 1)
-                print('This is Trip #', i + 1, 'recovery time', '\n', trip_time_i, 'Minutes')
-                trip_recovery_times.append(trip_time_i)
-                num_of_trips.append(i + 1)
-
-            print('This is a list of all trip times:', '\n', trip_recovery_times)
-            print("Total trip time for this period in Minutes is :", sum(trip_recovery_times))
-
-            # Setting the figure size
-            fig = plt.figure(figsize=(10, 7))
-
-            y_pos = np.arange(len(num_of_trips))
-            plt.bar(y_pos, trip_recovery_times, width=0.5, color='red')
-
-            # adding label to the top of each bars
-            for x, y in zip(y_pos, trip_recovery_times, ):
-                label = "{:.1f}".format(y)
-
-                plt.annotate(label,  # this is the text
-                             (x, y),  # this is the point to label
-                             textcoords="offset points",  # how to position the text
-                             xytext=(0, 10),  # distance from text to points (x,y)
-                             ha='center', fontsize=15,
-                             fontweight='bold')  # horizontal alignment (ha) can be left, right or center
-
-            # Add title and axis names
-            plt.title(
-                'Trip Weekly Stat ({}_{})'.format(self.sun, self.sat, fontsize=17))
-            plt.xlabel('Number of Trips', fontsize=15)
-            plt.ylabel('Trip Recovery Time (Minutes)', fontsize=15)
-
-            # Limits for the Y axis2
-            plt.ylim(0, max(trip_recovery_times) + 10)
-
-            # Create names
-            plt.xticks(y_pos, num_of_trips, )
-
-            # Saving the plot as an image
-            path = "/home/richart/AOD/Weekly_Stats_Docs/"  # Linux Path
-            # path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
-            filename = "{}_{}-Graph.png".format(self.sun, self.sat)
-            file = path + filename
-            fig.savefig(file, bbox_inches=None, dpi=None)
-
-            for i in range(0, len(trip_list)):
-                trip_start_time.append(trip_list[i][0])
-                trip_end_time.append(trip_list[i][1])
-
-            total_downtime = sum(trip_recovery_times)
-
-            trip_stats_dict = {'Trip #': num_of_trips,
-                               'Trip Start Time': trip_start_time,
-                               'Trip End Time': trip_end_time,
-                               'Recovery Time': trip_recovery_times,
-                               'Total Downtime': total_downtime}
-
-            # Saving a CSV file of trip information
-
-            path = "/home/richart/AOD/Weekly_Stats_Docs/"  # Linux Path
-            # path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
-            filename = "{}_{}-CSV.csv".format(self.sun, self.sat)
-            file = path + filename
-            trip_stats = pd.DataFrame(trip_stats_dict,
-                                      columns=['Trip #', 'Trip Start Time', 'Trip End Time', 'Recovery Time',
-                                               'Total Downtime'])
-            trip_stats.to_csv(file, index=False)
+    # def thread_complete(self):
+    #     print("THREAD COMPLETE!")
 
 
-
-            # Create CSV File for running totals
-
-            total_wk_time = 10080 - len(self.exclude_time) * 480
-            percentage_up_time = ((total_wk_time - total_downtime) / total_wk_time) * 100
-            mean_time_to_recover = total_downtime / len(trip_recovery_times)
-            date_wk_end = self.sat
-
-            cycle_31 = pd.date_range(start='2020-01-01', end='2020-06-28')
-            cycle_32 = ''
-            if self.sun in cycle_31:
-                self.cycle = 'cycle_31'
-            elif self.sun in cycle_32:
-                self.cycle = 'cycle_32'
-
-            totals_dict = {'Total Week Time': total_wk_time,
-                           'Total Trip Time': total_downtime,
-                           'Percentage Up Time': percentage_up_time,
-                           'Mean Time To Recover': mean_time_to_recover,
-                           'Date Week End': date_wk_end}
-
-            path = "/home/richart/AOD/Weekly_Stats_Docs/"
-            filename = '{}.csv'.format(self.cycle)
-            file = path + filename
-
-            if os.path.isfile(file):
-                totals = pd.read_csv(file)
-                if date_wk_end in totals['Date Week End'].values:
-                    totals.drop(totals.loc[totals['Date Week End'].values == date_wk_end].index, inplace=True)
-                    totals.to_csv(file, index=False)
-                    totals = pd.DataFrame(totals_dict, columns=['Total Week Time',
-                                                                'Total Trip Time',
-                                                                'Percentage Up Time',
-                                                                'Mean Time To Recover',
-                                                                'Date Week End'], index=[0])
-                    totals.to_csv(file, mode='a', header=False, index=False)
-                    totals = pd.read_csv(file)
-                    totals['Date Week End'] = pd.to_datetime(totals['Date Week End'])
-                    totals = totals.sort_values(by=['Date Week End'])
-                    totals.to_csv(file, index=False)
-
-                else:
-                    totals = pd.DataFrame(totals_dict, columns=['Total Week Time',
-                                                                'Total Trip Time',
-                                                                'Percentage Up Time',
-                                                                'Mean Time To Recover',
-                                                                'Date Week End'], index=[0])
-                    totals.to_csv(file, mode='a', header=False, index=False)
-                    totals = pd.read_csv(file)
-                    totals['Date Week End'] = pd.to_datetime(totals['Date Week End'])
-                    totals = totals.sort_values(by=['Date Week End'])
-                    totals.to_csv(file, index=False)
-
-            else:
-                totals = pd.DataFrame(totals_dict, columns=['Total Week Time',
-                                                            'Total Trip Time',
-                                                            'Percentage Up Time',
-                                                            'Mean Time To Recover',
-                                                            'Date Week End'], index=[0])
-                totals.to_csv(file, index=False)
-                # Show graphic
-            plt.show()
-            sys.stdout.close()  # Close text file
-            # app.quit()
-
-        else:
-            total_wk_time = 10080 - len(self.exclude_time) * 480
-            percentage_up_time = 100
-            mean_time_to_recover = 0
-            date_wk_end = self.sat
-
-            cycle_31 = pd.date_range(start='2020-01-01', end='2020-06-28')
-            cycle_32 = ''
-            if self.sun in cycle_31:
-                self.cycle = 'cycle_31'
-            elif self.sun in cycle_32:
-                self.cycle = 'cycle_32'
-
-            totals_dict = {'Total Week Time': total_wk_time,
-                           'Total Trip Time': 0,
-                           'Percentage Up Time': percentage_up_time,
-                           'Mean Time To Recover': mean_time_to_recover,
-                           'Date Week End': date_wk_end}
-
-            path = "/home/richart/AOD/Weekly_Stats_Docs/"
-            filename = '{}.csv'.format(self.cycle)
-            file = path + filename
-
-            if os.path.isfile(file):
-                totals = pd.read_csv(file)
-                if date_wk_end in totals['Date Week End'].values:
-                    totals.drop(totals.loc[totals['Date Week End'].values == date_wk_end].index, inplace=True)
-                    totals.to_csv(file, index=False)
-                    totals = pd.DataFrame(totals_dict, columns=['Total Week Time',
-                                                                'Total Trip Time',
-                                                                'Percentage Up Time',
-                                                                'Mean Time To Recover',
-                                                                'Date Week End'], index=[0])
-                    totals.to_csv(file, mode='a', header=False, index=False)
-                    totals = pd.read_csv(file)
-                    totals['Date Week End'] = pd.to_datetime(totals['Date Week End'])
-                    totals = totals.sort_values(by=['Date Week End'])
-                    totals.to_csv(file, index=False)
-
-                else:
-                    totals = pd.DataFrame(totals_dict, columns=['Total Week Time',
-                                                                'Total Trip Time',
-                                                                'Percentage Up Time',
-                                                                'Mean Time To Recover',
-                                                                'Date Week End'], index=[0])
-                    totals.to_csv(file, mode='a', header=False, index=False)
-                    totals = pd.read_csv(file)
-                    totals['Date Week End'] = pd.to_datetime(totals['Date Week End'])
-                    totals = totals.sort_values(by=['Date Week End'])
-                    totals.to_csv(file, index=False)
-
-            else:
-                totals = pd.DataFrame(totals_dict, columns=['Total Week Time',
-                                                            'Total Trip Time',
-                                                            'Percentage Up Time',
-                                                            'Mean Time To Recover',
-                                                            'Date Week End'], index=[0])
-                totals.to_csv(file, index=False)
-
-        path = "/home/richart/AOD/Weekly_Stats_Docs/"
-        filename = '{}.csv'.format(self.cycle)
-        file = path + filename
-        running_total = pd.read_csv(file)
-        percentage_up_time = running_total['Percentage Up Time'].tolist()
-        mean_time_to_recover = running_total['Mean Time To Recover'].tolist()
-        date_week_end = running_total['Date Week End'].tolist()
-        print(percentage_up_time)
-        print(mean_time_to_recover)
-        print(date_week_end)
-
-
-if __name__ == "__main__":
-    import sys
-
+if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-    Weekly_Stats_Application = QtWidgets.QWidget()
-    ui = Ui_Weekly_Stats_Application()
-    ui.setupUi(Weekly_Stats_Application)
-    Weekly_Stats_Application.show()
-    sys.exit(app.exec_())
+    window = WeeklyStats()
+    app.exec_()
