@@ -483,6 +483,9 @@ class WeeklyStats(QtWidgets.QWidget):
         # This loop goes over the length of df, looks for a condition in where we are filling, If that condition is true
         # it then looks to see if the next current falls below 1 mA, if this happens then we have another trip before
         # we have fully recovered. Therefore we need to set a recovery time to just before the trip happened at i-1
+        # Did not go with above method as it was too difficult to track changes over 1 second intervals, The way below
+        # goes over the length of the dataframe and finds wherever there is a trip, once that is found it sets the
+        # previous line to recover and this solves our problem
 
         for i in range(1, len(df)):
             if df['Trip'][i]:
