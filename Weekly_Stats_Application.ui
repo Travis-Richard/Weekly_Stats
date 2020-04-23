@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1045</width>
-    <height>384</height>
+    <height>426</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -148,12 +148,12 @@
      <x>10</x>
      <y>120</y>
      <width>1021</width>
-     <height>252</height>
+     <height>294</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="Exclusion_Dates">
-    <item row="1" column="0">
-     <widget class="QLabel" name="sun_label">
+    <item row="1" column="6">
+     <widget class="QLabel" name="sat_label">
       <property name="font">
        <font>
         <pointsize>10</pointsize>
@@ -162,11 +162,131 @@
        </font>
       </property>
       <property name="text">
-       <string>Sun</string>
+       <string>Sat</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
       </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QLabel" name="tues_label">
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Tues</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="5">
+     <widget class="QPushButton" name="fri_3rd_btn">
+      <property name="text">
+       <string>16:00</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <attribute name="buttonGroup">
+       <string notr="true">Exclusion_Dates_btns</string>
+      </attribute>
+     </widget>
+    </item>
+    <item row="3" column="5">
+     <widget class="QPushButton" name="fri_1st_btn">
+      <property name="text">
+       <string>00:00</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <attribute name="buttonGroup">
+       <string notr="true">Exclusion_Dates_btns</string>
+      </attribute>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLabel" name="mon_label">
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Mon</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="5">
+     <widget class="QLabel" name="fri_label">
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Fri</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="3">
+     <widget class="QLabel" name="wed_label">
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Wed</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="5">
+     <widget class="QPushButton" name="fri_2nd_btn">
+      <property name="text">
+       <string>08:00</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <attribute name="buttonGroup">
+       <string notr="true">Exclusion_Dates_btns</string>
+      </attribute>
+     </widget>
+    </item>
+    <item row="3" column="3">
+     <widget class="QPushButton" name="wed_1st_btn">
+      <property name="text">
+       <string>00:00</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <attribute name="buttonGroup">
+       <string notr="true">Exclusion_Dates_btns</string>
+      </attribute>
      </widget>
     </item>
     <item row="7" column="5" colspan="2">
@@ -200,171 +320,8 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="6">
-     <widget class="QLabel" name="sat_label">
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Sat</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="5">
-     <widget class="QLabel" name="fri_label">
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Fri</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLabel" name="mon_label">
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Mon</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="2">
-     <widget class="QLabel" name="tues_label">
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Tues</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="3">
-     <widget class="QLabel" name="wed_label">
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Wed</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="QPushButton" name="sun_1st_btn">
-      <property name="text">
-       <string>00:00</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <attribute name="buttonGroup">
-       <string notr="true">Exclusion_Dates_btns</string>
-      </attribute>
-     </widget>
-    </item>
-    <item row="3" column="1">
-     <widget class="QPushButton" name="mon_1st_btn">
-      <property name="text">
-       <string>00:00</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <attribute name="buttonGroup">
-       <string notr="true">Exclusion_Dates_btns</string>
-      </attribute>
-     </widget>
-    </item>
-    <item row="3" column="2">
-     <widget class="QPushButton" name="tues_1st_btn">
-      <property name="text">
-       <string>00:00</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <attribute name="buttonGroup">
-       <string notr="true">Exclusion_Dates_btns</string>
-      </attribute>
-     </widget>
-    </item>
-    <item row="3" column="6">
-     <widget class="QPushButton" name="sat_1st_btn">
-      <property name="text">
-       <string>00:00</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <attribute name="buttonGroup">
-       <string notr="true">Exclusion_Dates_btns</string>
-      </attribute>
-     </widget>
-    </item>
-    <item row="3" column="5">
-     <widget class="QPushButton" name="fri_1st_btn">
-      <property name="text">
-       <string>00:00</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <attribute name="buttonGroup">
-       <string notr="true">Exclusion_Dates_btns</string>
-      </attribute>
-     </widget>
-    </item>
     <item row="3" column="4">
      <widget class="QPushButton" name="thur_1st_btn">
-      <property name="text">
-       <string>00:00</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <attribute name="buttonGroup">
-       <string notr="true">Exclusion_Dates_btns</string>
-      </attribute>
-     </widget>
-    </item>
-    <item row="3" column="3">
-     <widget class="QPushButton" name="wed_1st_btn">
       <property name="text">
        <string>00:00</string>
       </property>
@@ -393,6 +350,101 @@
      <widget class="QPushButton" name="tues_2nd_btn">
       <property name="text">
        <string>08:00</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <attribute name="buttonGroup">
+       <string notr="true">Exclusion_Dates_btns</string>
+      </attribute>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QPushButton" name="sun_2nd_btn">
+      <property name="text">
+       <string>08:00</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <attribute name="buttonGroup">
+       <string notr="true">Exclusion_Dates_btns</string>
+      </attribute>
+     </widget>
+    </item>
+    <item row="5" column="6">
+     <widget class="QPushButton" name="sat_3rd_btn">
+      <property name="text">
+       <string>16:00</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <attribute name="buttonGroup">
+       <string notr="true">Exclusion_Dates_btns</string>
+      </attribute>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QPushButton" name="sun_1st_btn">
+      <property name="text">
+       <string>00:00</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <attribute name="buttonGroup">
+       <string notr="true">Exclusion_Dates_btns</string>
+      </attribute>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QPushButton" name="mon_1st_btn">
+      <property name="text">
+       <string>00:00</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <attribute name="buttonGroup">
+       <string notr="true">Exclusion_Dates_btns</string>
+      </attribute>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="sun_label">
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Sun</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="2">
+     <widget class="QPushButton" name="tues_1st_btn">
+      <property name="text">
+       <string>00:00</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <attribute name="buttonGroup">
+       <string notr="true">Exclusion_Dates_btns</string>
+      </attribute>
+     </widget>
+    </item>
+    <item row="3" column="6">
+     <widget class="QPushButton" name="sat_1st_btn">
+      <property name="text">
+       <string>00:00</string>
       </property>
       <property name="checkable">
        <bool>true</bool>
@@ -441,19 +493,6 @@
       </attribute>
      </widget>
     </item>
-    <item row="4" column="0">
-     <widget class="QPushButton" name="sun_2nd_btn">
-      <property name="text">
-       <string>08:00</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <attribute name="buttonGroup">
-       <string notr="true">Exclusion_Dates_btns</string>
-      </attribute>
-     </widget>
-    </item>
     <item row="5" column="0">
      <widget class="QPushButton" name="sun_3rd_btn">
       <property name="text">
@@ -467,49 +506,10 @@
       </attribute>
      </widget>
     </item>
-    <item row="4" column="5">
-     <widget class="QPushButton" name="fri_2nd_btn">
-      <property name="text">
-       <string>08:00</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <attribute name="buttonGroup">
-       <string notr="true">Exclusion_Dates_btns</string>
-      </attribute>
-     </widget>
-    </item>
     <item row="4" column="6">
      <widget class="QPushButton" name="sat_2nd_btn">
       <property name="text">
        <string>08:00</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <attribute name="buttonGroup">
-       <string notr="true">Exclusion_Dates_btns</string>
-      </attribute>
-     </widget>
-    </item>
-    <item row="5" column="5">
-     <widget class="QPushButton" name="fri_3rd_btn">
-      <property name="text">
-       <string>16:00</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <attribute name="buttonGroup">
-       <string notr="true">Exclusion_Dates_btns</string>
-      </attribute>
-     </widget>
-    </item>
-    <item row="5" column="6">
-     <widget class="QPushButton" name="sat_3rd_btn">
-      <property name="text">
-       <string>16:00</string>
       </property>
       <property name="checkable">
        <bool>true</bool>
@@ -599,7 +599,7 @@
     <item row="6" column="0" colspan="3">
      <widget class="QLabel" name="clear_label">
       <property name="text">
-       <string>Clear Exclusion Dates if mistake was made and btn pressed</string>
+       <string>Clear Exclusion Dates</string>
       </property>
      </widget>
     </item>
