@@ -437,11 +437,11 @@ class WeeklyStats(QtWidgets.QWidget):
         df.columns = ['Time', 'Current', 'A', 'B', 'C']
         df = df.drop(columns=['A', 'B', 'C'])
         df['Time'] = pd.to_datetime(df['Time'], unit='s') - pd.Timedelta(hours=6)
-        df['Current'] = df['Current'].map(lambda y: str(y)[:5])
+        # df['Current'] = df['Current'].map(lambda y: str(y)[:5])
         df['Current'] = pd.to_numeric(df['Current'])
-        df = df.set_index(['Time'])
-        df = df.resample('10S').max()
-        df.reset_index(inplace=True)
+        # df = df.set_index(['Time'])
+        # df = df.resample('10S').max()
+        # df.reset_index(inplace=True)
         df['Current_S'] = df['Current'].shift(-1)
         df['Trip'] = (df['Current'] > 10) & (df['Current_S'] < 1)
         df['Recover'] = (df['Current_S'] > df['Current']) & (df['Current_S'] > 220)
@@ -473,7 +473,7 @@ class WeeklyStats(QtWidgets.QWidget):
         # the Current at the i location plus 1, ie coming out of a shift is less than 1 then we want to set the Trip
         # equal to true so we can again account for downtime that isn't necessarily a trip
 
-        for i in range(0, len(df)):
+        for i in range(0, len(df)-1):
             if df['Time_Subtract'][i] > 7:
                 if df['Current'][i] < 1:
                     df.loc[i, 'Recover'] = True
@@ -485,11 +485,21 @@ class WeeklyStats(QtWidgets.QWidget):
         # we have fully recovered. Therefore we need to set a recovery time to just before the trip happened at i-1
 
         for i in range(1, len(df)):
-            # if df['Current'][i - 1] > 10 and df['Current_S'][i - 1] > df['Current'][i - 1]:
+            if df['Trip'][i]:
+                df.loc[i-1, 'Recover'] = True
 
-            if 10 < df['Current'][i - 1] < df['Current_S'][i - 1]:
-                if df['Current_S'][i] < 1:
-                    df.loc[i - 1, 'Recover'] = True
+        # for i in range(0, len(df)-1):
+        #     if df['Current_S'][i] > df['Current'][i]:
+        #         if df['Current'][i+1]
+
+        # for i in range(1, len(df)):
+        #     if df['Current'][i - 1] > 10 and df['Current_S'][i - 1] > df['Current'][i - 1]:
+        #         if df['Current_S'][i] < 1:
+        #             df.loc[i - 1, 'Recover'] = True
+
+            # if 10 < df['Current'][i - 1] < df['Current_S'][i - 1]:
+            #     if df['Current_S'][i] < 1:
+            #         df.loc[i - 1, 'Recover'] = True
 
         # These two if statements look at the beginning and end of the week. Since we are always starting at Sunday
         # 00:00:00, we may have started with a trip from the previous week and thats why we need to set the Trip
@@ -497,10 +507,10 @@ class WeeklyStats(QtWidgets.QWidget):
         # need to set the Recovery equal to True so we can have an accurate account of downtime even if we haven't
         # recovered
 
-        if df['Current'][0] < 1:
+        if df['Current'][0] < 130:
             df.loc[0, 'Trip'] = True
         last_row = len(df) - 1
-        if df['Current'][last_row] < 1:
+        if df['Current'][last_row] < 130:
             df.loc[last_row, 'Recover'] = True
 
         # This loop will create two lists one for the start time of the recovery and one for the end time of the
