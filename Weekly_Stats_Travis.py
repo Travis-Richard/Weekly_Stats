@@ -192,12 +192,13 @@ class WeeklyStats(QtWidgets.QWidget):
         total_wk_time = 10080 - len(self.exclude_time) * 480
         percentage_up_time = ((total_wk_time - self.total_downtime) / total_wk_time) * 100
         mean_time_to_recover = self.total_downtime / len(self.trip_recovery_times)
+        mean_time_between_failures = (total_wk_time / 60) / len(self.trip_recovery_times)
         date_wk_end = self.sat
 
         cycle_31 = pd.date_range(start='2020-01-01', end='2020-06-28')
         cycle_32 = ''
         if self.sun in cycle_31:
-            self.cycle = 'cycle_31'
+            self.cycle = 'cycle_A'
         elif self.sun in cycle_32:
             self.cycle = 'cycle_32'
 
@@ -205,6 +206,7 @@ class WeeklyStats(QtWidgets.QWidget):
                        'Total Trip Time': self.total_downtime,
                        'Percentage Up Time': percentage_up_time,
                        'Mean Time To Recover': mean_time_to_recover,
+                       'Mean Time Between Failures': mean_time_between_failures,
                        'Date Week End': date_wk_end}
 
         filename = '{}.csv'.format(self.cycle)
@@ -219,6 +221,7 @@ class WeeklyStats(QtWidgets.QWidget):
                                                             'Total Trip Time',
                                                             'Percentage Up Time',
                                                             'Mean Time To Recover',
+                                                            'Mean Time Between Failures',
                                                             'Date Week End'], index=[0])
                 totals.to_csv(file, mode='a', header=False, index=False)
                 totals = pd.read_csv(file)
@@ -231,6 +234,7 @@ class WeeklyStats(QtWidgets.QWidget):
                                                             'Total Trip Time',
                                                             'Percentage Up Time',
                                                             'Mean Time To Recover',
+                                                            'Mean Time Between Failures',
                                                             'Date Week End'], index=[0])
                 totals.to_csv(file, mode='a', header=False, index=False)
                 totals = pd.read_csv(file)
@@ -243,6 +247,7 @@ class WeeklyStats(QtWidgets.QWidget):
                                                         'Total Trip Time',
                                                         'Percentage Up Time',
                                                         'Mean Time To Recover',
+                                                        'Mean Time Between Failures',
                                                         'Date Week End'], index=[0])
             totals.to_csv(file, index=False)
 
@@ -254,6 +259,9 @@ class WeeklyStats(QtWidgets.QWidget):
         percentage_up_time = running_total['Percentage Up Time'].tolist()
         mean_time_to_recover = running_total['Mean Time To Recover'].tolist()
         date_week_end = running_total['Date Week End'].tolist()
+        mean_time_between_failures = running_total['Mean Time Between Failures'].tolist()
+
+        print(mean_time_between_failures)
 
         # Plotting the variables
         fig = plt.figure(figsize=(10, 4))
