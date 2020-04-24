@@ -198,7 +198,7 @@ class WeeklyStats(QtWidgets.QWidget):
         cycle_31 = pd.date_range(start='2020-01-01', end='2020-06-28')
         cycle_32 = ''
         if self.sun in cycle_31:
-            self.cycle = 'cycle_A'
+            self.cycle = 'cycle_31'
         elif self.sun in cycle_32:
             self.cycle = 'cycle_32'
 
