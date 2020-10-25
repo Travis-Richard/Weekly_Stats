@@ -68,9 +68,9 @@ class WeeklyStats(QtWidgets.QWidget):
         self.num_of_trips = []
         self.trip_start_time = []
         self.trip_end_time = []
-        self.path = "/home/richart/AOD/Weekly_Stats_Docs/Cycle_32/"  # Linux Path
+        # self.path = "/home/richart/AOD/Weekly_Stats_Docs/Cycle_32/"  # Linux Path
         # self.path = "/home/richart/Documents/"  # Linux Path
-        # self.path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
+        self.path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Docs/'  # Windows Path
 
         self.ok_btn.clicked.connect(self.week_selection_thread)
         self.get_data_btn.clicked.connect(self.get_data_thread)

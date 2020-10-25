@@ -27,11 +27,12 @@ exclusions = exclusions.sort_values(by = 'start')
 
 
 if os.path.isfile(file):
-    exclusions.to_csv(file, mode='a', header=False, index=False)
-    exclusions = pd.read_csv(file)
-    exclusions['start'] = pd.to_datetime(exclusions['start'])
-    exclusions = exclusions.sort_values(by='start')
-    exclusions.to_csv(file, index=False)
+    exclusions.to_csv(file, mode='a', header=None, index=False)
+    # exclusions = pd.read_csv(file)
+    # exclusions.columns = ['start', 'end', 'shift']
+    # exclusions['start'] = pd.to_datetime(exclusions['start'])
+    # exclusions = exclusions.sort_values(by='start')
+    # exclusions.to_csv(file, header=None, index=False)
 
 else:
-    exclusions.to_csv(file, index=False)
+    exclusions.to_csv(file, header=None, index=False)
