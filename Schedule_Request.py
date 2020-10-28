@@ -3,7 +3,8 @@ import pandas as pd
 import os
 
 path = r'C:\Users\richart\Documents\Projects\Weekly_Stats_Documents/'
-filename = 'Exclusion_Shifts_Master.csv'
+# filename = 'Exclusion_Shifts_Master.csv'
+filename = 'Exclusion_Shifts_Master_NO_NS.csv'
 file = path + filename
 
 # using cycle 30, 31 and 32 in link below to create list
@@ -14,7 +15,7 @@ exclusions = exclusions.drop(columns=['id', 'tags', 'cancelled', 'rendering', 'd
 
 
 exclusions = exclusions[exclusions.name != 'N']
-exclusions = exclusions[exclusions.name != 'NS']
+# exclusions = exclusions[exclusions.name != 'NS']
 
 exclusions['start'] = pd.to_datetime(exclusions['start']) - pd.Timedelta(hours = 6)
 exclusions['start'] = exclusions['start'].dt.tz_localize(None)
