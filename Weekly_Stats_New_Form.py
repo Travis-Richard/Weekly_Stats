@@ -187,7 +187,7 @@ class WeeklyStats(QtWidgets.QWidget):
         # df = df.resample('10S').max()
         # df.reset_index(inplace=True)
         df['Current_S'] = df['Current'].shift(-1)
-        df['Trip'] = (df['Current'] > 10) & (df['Current_S'] < 1)
+        df['Trip'] = (df['Current'] > 10) & (df['Current_S'] < 10)
         df['Recover'] = (df['Current_S'] > df['Current']) & (df['Current_S'] > 220)
 
         df = df.set_index(['Time'])
@@ -399,12 +399,13 @@ class WeeklyStats(QtWidgets.QWidget):
 
         self.cycle = 'cycle_32'
 
-        totals_dict = {'Total Week Time': total_wk_time,
+        totals_dict = {'Date Week End': date_wk_end,
+                       'Number of Trips': self.num_of_trips,
+                       'Total Week Time': total_wk_time,
                        'Total Trip Time': self.total_downtime,
                        'Percentage Up Time': percentage_up_time,
                        'Mean Time To Recover': mean_time_to_recover,
-                       'Mean Time Between Failures': mean_time_between_failures,
-                       'Date Week End': date_wk_end}
+                       'Mean Time Between Failures': mean_time_between_failures}
 
         filename = '{}.csv'.format(self.cycle)
         file = self.path + filename
@@ -414,12 +415,13 @@ class WeeklyStats(QtWidgets.QWidget):
             if date_wk_end in totals['Date Week End'].values:
                 totals.drop(totals.loc[totals['Date Week End'].values == date_wk_end].index, inplace=True)
                 totals.to_csv(file, index=False)
-                totals = pd.DataFrame(totals_dict, columns=['Total Week Time',
+                totals = pd.DataFrame(totals_dict, columns=['Date Week End',
+                                                            'Number of Trips'
+                                                            'Total Week Time',
                                                             'Total Trip Time',
                                                             'Percentage Up Time',
                                                             'Mean Time To Recover',
-                                                            'Mean Time Between Failures',
-                                                            'Date Week End'], index=[0])
+                                                            'Mean Time Between Failures'], index=[0])
                 totals.to_csv(file, mode='a', header=False, index=False)
                 totals = pd.read_csv(file)
                 totals['Date Week End'] = pd.to_datetime(totals['Date Week End'])
@@ -427,12 +429,13 @@ class WeeklyStats(QtWidgets.QWidget):
                 totals.to_csv(file, index=False)
 
             else:
-                totals = pd.DataFrame(totals_dict, columns=['Total Week Time',
+                totals = pd.DataFrame(totals_dict, columns=['Date Week End',
+                                                            'Number of Trips'
+                                                            'Total Week Time',
                                                             'Total Trip Time',
                                                             'Percentage Up Time',
                                                             'Mean Time To Recover',
-                                                            'Mean Time Between Failures',
-                                                            'Date Week End'], index=[0])
+                                                            'Mean Time Between Failures'], index=[0])
                 totals.to_csv(file, mode='a', header=False, index=False)
                 totals = pd.read_csv(file)
                 totals['Date Week End'] = pd.to_datetime(totals['Date Week End'])
@@ -440,12 +443,13 @@ class WeeklyStats(QtWidgets.QWidget):
                 totals.to_csv(file, index=False)
 
         else:
-            totals = pd.DataFrame(totals_dict, columns=['Total Week Time',
-                                                        'Total Trip Time',
-                                                        'Percentage Up Time',
-                                                        'Mean Time To Recover',
-                                                        'Mean Time Between Failures',
-                                                        'Date Week End'], index=[0])
+            totals = pd.DataFrame(totals_dict, columns=['Date Week End',
+                                                            'Number of Trips'
+                                                            'Total Week Time',
+                                                            'Total Trip Time',
+                                                            'Percentage Up Time',
+                                                            'Mean Time To Recover',
+                                                            'Mean Time Between Failures'], index=[0])
             totals.to_csv(file, index=False)
 
     def save_total_graph(self):
