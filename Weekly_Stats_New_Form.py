@@ -400,7 +400,7 @@ class WeeklyStats(QtWidgets.QWidget):
         self.cycle = 'cycle_32'
 
         totals_dict = {'Date Week End': date_wk_end,
-                       'Number of Trips': self.num_of_trips,
+                       'Number of Trips': len(self.trip_recovery_times),
                        'Total Week Time': total_wk_time,
                        'Total Trip Time': self.total_downtime,
                        'Percentage Up Time': percentage_up_time,
@@ -416,7 +416,7 @@ class WeeklyStats(QtWidgets.QWidget):
                 totals.drop(totals.loc[totals['Date Week End'].values == date_wk_end].index, inplace=True)
                 totals.to_csv(file, index=False)
                 totals = pd.DataFrame(totals_dict, columns=['Date Week End',
-                                                            'Number of Trips'
+                                                            'Number of Trips',
                                                             'Total Week Time',
                                                             'Total Trip Time',
                                                             'Percentage Up Time',
@@ -430,7 +430,7 @@ class WeeklyStats(QtWidgets.QWidget):
 
             else:
                 totals = pd.DataFrame(totals_dict, columns=['Date Week End',
-                                                            'Number of Trips'
+                                                            'Number of Trips',
                                                             'Total Week Time',
                                                             'Total Trip Time',
                                                             'Percentage Up Time',
@@ -444,7 +444,7 @@ class WeeklyStats(QtWidgets.QWidget):
 
         else:
             totals = pd.DataFrame(totals_dict, columns=['Date Week End',
-                                                            'Number of Trips'
+                                                            'Number of Trips',
                                                             'Total Week Time',
                                                             'Total Trip Time',
                                                             'Percentage Up Time',
